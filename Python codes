@@ -1,0 +1,48 @@
+# Pearson correlation 
+
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from scipy.stats import pearsonr
+
+df = pd.read_csv('Pearson_Correlation.csv')
+sns.set(style='white', font_scale=1.2, rc={"figure.dpi":600, 'savefig.dpi':600})
+
+g = sns.JointGrid(data=df, x='Reactivity in diseased cohort', y='Reactivity in healthy cohort', xlim=(0, 90), ylim=(0, 90), space=0.2, height=5)
+g = g.plot_joint(sns.regplot, color="xkcd:blue")
+g = g.plot_marginals(sns.distplot, kde=False, bins=9, color="xkcd:pastel blue")
+g.ax_joint.set_yticks([0, 20, 40, 60, 80])
+g.set_axis_labels("Frequency in diseased cohort","Frequency in healthy cohort", labelpad=15)
+g.ax_joint.text(10, 80, 'r = 0.975, P < .0001', fontstyle='italic')
+plt.tight_layout()
+
+
+
+# Splitting of protein sequence into 14-mer peptides
+
+from Bio import SeqIO
+
+myfile=SeqIO.parse('Common_Viruses_CD_HIT.fasta','fasta')
+for record in myfile:
+    sequence=record.seq
+    seq_len=len(sequence)
+    kmer=14
+    count=0
+    for seq in list(range(seq_len-(kmer-1))):
+        count=count+1
+        my_kmer=(sequence[seq:seq+kmer])
+        print('>'+str(record.id)+'_'+str(count)+'\n'+str(my_kmer),file=open("output.txt", "a"))
+        
+
+# Calculation of Biochemical properties
+
+from Bio import SeqIO
+from Bio.SeqUtils.ProtParam import ProteinAnalysis
+import os
+
+os.getcwd()
+
+for record in SeqIO.parse("LC_Sequences.fasta", "fasta"):
+    my_seq = str(record.seq)
+    analysed_seq = ProteinAnalysis(my_seq)
+    print(record.id, analysed_seq.aromaticity(), file=open("output.txt","a"))
